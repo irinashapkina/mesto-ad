@@ -6,10 +6,10 @@
   Из index.js не допускается что то экспортировать
 */
 
-import { initialCards } from "./cards.js";
 import { createCardElement, deleteCard, likeCard } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
+import { getUserInfo, getCardList, setUserInfo } from "./components/api.js";
 
 
 // DOM узлы
@@ -48,9 +48,19 @@ const handlePreviewPicture = ({ name, link }) => {
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-  profileTitle.textContent = profileTitleInput.value;
-  profileDescription.textContent = profileDescriptionInput.value;
-  closeModalWindow(profileFormModalWindow);
+
+  setUserInfo({
+    name: profileTitleInput.value,
+    about: profileDescriptionInput.value,
+  })
+    .then((userData) => {
+      profileTitle.textContent = userData.name;
+      profileDescription.textContent = userData.about;
+      closeModalWindow(profileFormModalWindow);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const handleAvatarFromSubmit = (evt) => {
@@ -78,7 +88,6 @@ const handleCardFormSubmit = (evt) => {
   closeModalWindow(cardFormModalWindow);
 };
 
-// EventListeners
 profileForm.addEventListener("submit", handleProfileFormSubmit);
 cardForm.addEventListener("submit", handleCardFormSubmit);
 avatarForm.addEventListener("submit", handleAvatarFromSubmit);
@@ -99,18 +108,7 @@ openCardFormButton.addEventListener("click", () => {
   openModalWindow(cardFormModalWindow);
 });
 
-// отображение карточек
-initialCards.forEach((data) => {
-  placesWrap.append(
-    createCardElement(data, {
-      onPreviewPicture: handlePreviewPicture,
-      onLikeIcon: likeCard,
-      onDeleteCard: deleteCard,
-    })
-  );
-});
 
-//настраиваем обработчики закрытия попапов
 const allPopups = document.querySelectorAll(".popup");
 allPopups.forEach((popup) => {
   setCloseModalWindowEventListeners(popup);
@@ -126,3 +124,24 @@ const validationSettings = {
 };
 
 enableValidation(validationSettings);
+
+Promise.all([getUserInfo(), getCardList()])
+  .then(([userData, cards]) => {
+
+    profileTitle.textContent = userData.name;
+    profileDescription.textContent = userData.about;
+    profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
+
+    cards.reverse().forEach((card) => {
+      placesWrap.append(
+        createCardElement(card, {
+          onPreviewPicture: handlePreviewPicture,
+          onLikeIcon: likeCard,
+          onDeleteCard: deleteCard,
+        })
+      );
+    });
+  })
+  .catch((err) => {
+    console.log("Ошибка:", err);
+  });
