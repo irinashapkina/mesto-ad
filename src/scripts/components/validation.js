@@ -1,4 +1,3 @@
-// Функция показывает сообщение об ошибке
 function showInputError(formElement, inputElement, errorMessage, settings) {
   const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
   inputElement.classList.add(settings.inputErrorClass);
@@ -6,7 +5,6 @@ function showInputError(formElement, inputElement, errorMessage, settings) {
   errorElement.classList.add(settings.errorClass);
 }
 
-// Функция скрывает сообщение об ошибке
 function hideInputError(formElement, inputElement, settings) {
   const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
   inputElement.classList.remove(settings.inputErrorClass);
@@ -14,9 +12,7 @@ function hideInputError(formElement, inputElement, settings) {
   errorElement.classList.remove(settings.errorClass);
 }
 
-// Проверка валидности поля
 function checkInputValidity(formElement, inputElement, settings) {
-  // Кастомная проверка через регулярку, если есть data-error-message
   if (inputElement.dataset.errorMessage) {
     const regex = /^[A-Za-zА-Яа-яЁё\s-]+$/;
     if (!regex.test(inputElement.value)) {
@@ -25,7 +21,6 @@ function checkInputValidity(formElement, inputElement, settings) {
     }
   }
 
-  // Стандартная проверка HTML5
   if (!inputElement.validity.valid) {
     showInputError(formElement, inputElement, inputElement.validationMessage, settings);
     return;
@@ -34,24 +29,20 @@ function checkInputValidity(formElement, inputElement, settings) {
   hideInputError(formElement, inputElement, settings);
 }
 
-// Проверка: есть ли невалидные поля
 function hasInvalidInput(inputList) {
   return inputList.some((inputElement) => !inputElement.validity.valid);
 }
 
-// Отключить кнопку
 function disableSubmitButton(buttonElement, settings) {
   buttonElement.disabled = true;
   buttonElement.classList.add(settings.inactiveButtonClass);
 }
 
-// Включить кнопку
 function enableSubmitButton(buttonElement, settings) {
   buttonElement.disabled = false;
   buttonElement.classList.remove(settings.inactiveButtonClass);
 }
 
-// Переключение состояния кнопки
 function toggleButtonState(inputList, buttonElement, settings) {
   if (hasInvalidInput(inputList)) {
     disableSubmitButton(buttonElement, settings);
@@ -60,7 +51,6 @@ function toggleButtonState(inputList, buttonElement, settings) {
   }
 }
 
-// Назначение слушателей
 function setEventListeners(formElement, settings) {
   const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
   const buttonElement = formElement.querySelector(settings.submitButtonSelector);
@@ -75,7 +65,6 @@ function setEventListeners(formElement, settings) {
   });
 }
 
-// Очистка ошибок при открытии формы
 export function clearValidation(formElement, settings) {
   const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
   const buttonElement = formElement.querySelector(settings.submitButtonSelector);
@@ -87,7 +76,6 @@ export function clearValidation(formElement, settings) {
   disableSubmitButton(buttonElement, settings);
 }
 
-// Включение валидации всех форм
 export function enableValidation(settings) {
   const formList = Array.from(document.querySelectorAll(settings.formSelector));
 
