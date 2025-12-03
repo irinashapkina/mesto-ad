@@ -9,7 +9,7 @@
 import { createCardElement, deleteCard, likeCard } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
-import { getUserInfo, getCardList, setUserInfo,   setUserAvatar } from "./components/api.js";
+import { getUserInfo, getCardList, setUserInfo,   setUserAvatar, addCard } from "./components/api.js";
 
 
 // DOM узлы
@@ -77,21 +77,25 @@ const handleAvatarFromSubmit = (evt) => {
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-  placesWrap.prepend(
-    createCardElement(
-      {
-        name: cardNameInput.value,
-        link: cardLinkInput.value,
-      },
-      {
+
+  const name = cardNameInput.value;
+  const link = cardLinkInput.value;
+
+  addCard({ name, link })
+    .then((newCard) => {
+      const cardElement = createCardElement(newCard, {
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: likeCard,
         onDeleteCard: deleteCard,
-      }
-    )
-  );
+      });
 
-  closeModalWindow(cardFormModalWindow);
+      placesWrap.prepend(cardElement); 
+      closeModalWindow(cardFormModalWindow); 
+      cardForm.reset(); 
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 profileForm.addEventListener("submit", handleProfileFormSubmit);
