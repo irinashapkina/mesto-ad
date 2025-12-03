@@ -1,5 +1,14 @@
-Стартовый набор для выполнения проектной работы Место
+Ссылка на опубликённый проект
+[https://irinashapkina.github.io/mesto-ad/
+](https://irinashapkina.github.io/mesto-ad/)
 
-Для запуска приложения необходимо использовать live-server
-![изображение live-server](image.png)
-Live-server является расширением VSCode
+Запуск локального сервера
+```npm run dev```
+
+Сборка проекта
+```npm run build```
+
+Публикация на GitHub Pages
+```npm run deploy```
+
+ 
