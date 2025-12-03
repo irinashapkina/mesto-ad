@@ -6,10 +6,7 @@
   ВНИМАНИЕ: из index.js ничего экспортировать нельзя!
 */
 
-import {
-  createCardElement,
-  likeCard
-} from "./components/card.js";
+import { createCardElement } from "./components/card.js";
 
 import {
   openModalWindow,
@@ -25,10 +22,9 @@ import {
   setUserInfo,
   setUserAvatar,
   addCard,
-  deleteCardRequest
+  deleteCardRequest,
+  changeLikeCardStatus
 } from "./components/api.js";
-
-
 
 const placesWrap = document.querySelector(".places__list");
 
@@ -63,7 +59,9 @@ let currentUserId = null;
 let cardToDelete = null;
 let cardToDeleteId = null;
 
-
+// --------------------------------------------------------
+//   Превью картинки
+// --------------------------------------------------------
 const handlePreviewPicture = ({ name, link }) => {
   imageElement.src = link;
   imageElement.alt = name;
@@ -71,6 +69,9 @@ const handlePreviewPicture = ({ name, link }) => {
   openModalWindow(imageModalWindow);
 };
 
+// --------------------------------------------------------
+//   Обновление профиля
+// --------------------------------------------------------
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
 
@@ -86,6 +87,9 @@ const handleProfileFormSubmit = (evt) => {
     .catch(console.log);
 };
 
+// --------------------------------------------------------
+//   Обновление аватара
+// --------------------------------------------------------
 const handleAvatarFromSubmit = (evt) => {
   evt.preventDefault();
 
@@ -97,6 +101,9 @@ const handleAvatarFromSubmit = (evt) => {
     .catch(console.log);
 };
 
+// --------------------------------------------------------
+//   Добавление карточки
+// --------------------------------------------------------
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
 
@@ -108,7 +115,7 @@ const handleCardFormSubmit = (evt) => {
       const cardElement = createCardElement(newCard, {
         currentUserId,
         onPreviewPicture: handlePreviewPicture,
-        onLikeIcon: likeCard,
+        onLikeIcon: handleLikeClick,
         onDeleteClick: handleDeleteClick
       });
 
@@ -119,12 +126,31 @@ const handleCardFormSubmit = (evt) => {
     .catch(console.log);
 };
 
+// --------------------------------------------------------
+//   Удаление карточки
+// --------------------------------------------------------
 const handleDeleteClick = (cardElement, cardId) => {
   cardToDelete = cardElement;
   cardToDeleteId = cardId;
   openModalWindow(deleteConfirmPopup);
 };
 
+// --------------------------------------------------------
+//   Лайк карточки (API + toggle)
+// --------------------------------------------------------
+const handleLikeClick = (likeButton, cardId) => {
+  const isLiked = likeButton.classList.contains("card__like-button_is-active");
+
+  changeLikeCardStatus(cardId, isLiked)
+    .then(() => {
+      likeButton.classList.toggle("card__like-button_is-active");
+    })
+    .catch((err) => console.log(err));
+};
+
+// --------------------------------------------------------
+//   Submit формы удаления
+// --------------------------------------------------------
 deleteConfirmForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
 
@@ -136,10 +162,16 @@ deleteConfirmForm.addEventListener("submit", (evt) => {
     .catch(console.log);
 });
 
+// --------------------------------------------------------
+//   Слушатели форм
+// --------------------------------------------------------
 profileForm.addEventListener("submit", handleProfileFormSubmit);
 cardForm.addEventListener("submit", handleCardFormSubmit);
 avatarForm.addEventListener("submit", handleAvatarFromSubmit);
 
+// --------------------------------------------------------
+//   Открытие попапов
+// --------------------------------------------------------
 openProfileFormButton.addEventListener("click", () => {
   profileTitleInput.value = profileTitle.textContent;
   profileDescriptionInput.value = profileDescription.textContent;
@@ -156,11 +188,16 @@ openCardFormButton.addEventListener("click", () => {
   openModalWindow(cardFormModalWindow);
 });
 
+// --------------------------------------------------------
+//   Закрытие всех попапов
+// --------------------------------------------------------
 document.querySelectorAll(".popup").forEach((popup) => {
   setCloseModalWindowEventListeners(popup);
 });
 
-
+// --------------------------------------------------------
+//   Валидация
+// --------------------------------------------------------
 enableValidation({
   formSelector: ".popup__form",
   inputSelector: ".popup__input",
@@ -170,7 +207,9 @@ enableValidation({
   errorClass: "popup__error_visible",
 });
 
-
+// --------------------------------------------------------
+//   Инициализация приложения
+// --------------------------------------------------------
 Promise.all([getUserInfo(), getCardList()])
   .then(([userData, cards]) => {
     currentUserId = userData._id;
@@ -183,7 +222,7 @@ Promise.all([getUserInfo(), getCardList()])
         createCardElement(card, {
           currentUserId,
           onPreviewPicture: handlePreviewPicture,
-          onLikeIcon: likeCard,
+          onLikeIcon: handleLikeClick,
           onDeleteClick: handleDeleteClick
         })
       )
