@@ -1,21 +1,10 @@
-/*
-  Файл index.js — точка входа в приложение.
-  Здесь должна находиться только логика инициализации,
-  все вспомогательные функции импортируются из отдельных модулей.
-
-  ВНИМАНИЕ: из index.js ничего экспортировать нельзя!
-*/
-
 import { createCardElement } from "./components/card.js";
-
 import {
   openModalWindow,
   closeModalWindow,
-  setCloseModalWindowEventListeners
+  setCloseModalWindowEventListeners,
 } from "./components/modal.js";
-
 import { enableValidation } from "./components/validation.js";
-
 import {
   getUserInfo,
   getCardList,
@@ -23,7 +12,7 @@ import {
   setUserAvatar,
   addCard,
   deleteCardRequest,
-  changeLikeCardStatus
+  changeLikeCardStatus,
 } from "./components/api.js";
 
 const placesWrap = document.querySelector(".places__list");
@@ -31,7 +20,9 @@ const placesWrap = document.querySelector(".places__list");
 const profileFormModalWindow = document.querySelector(".popup_type_edit");
 const profileForm = profileFormModalWindow.querySelector(".popup__form");
 const profileTitleInput = profileForm.querySelector(".popup__input_type_name");
-const profileDescriptionInput = profileForm.querySelector(".popup__input_type_description");
+const profileDescriptionInput = profileForm.querySelector(
+  ".popup__input_type_description"
+);
 
 const openProfileFormButton = document.querySelector(".profile__edit-button");
 const profileTitle = document.querySelector(".profile__title");
@@ -55,6 +46,20 @@ const imageCaption = imageModalWindow.querySelector(".popup__caption");
 const deleteConfirmPopup = document.querySelector(".popup_type_remove-card");
 const deleteConfirmForm = deleteConfirmPopup.querySelector(".popup__form");
 
+const statsPopup = document.querySelector(".popup_type_info");
+const statsTitle = statsPopup.querySelector(".popup__title");
+const statsList = statsPopup.querySelector(".popup__info");
+const statsUsersTitle = statsPopup.querySelector(".popup__text");
+const statsUsersList = statsPopup.querySelector(".popup__list");
+
+const statsDefinitionTemplate = document.getElementById(
+  "popup-info-definition-template"
+);
+const statsUserTemplate = document.getElementById(
+  "popup-info-user-preview-template"
+);
+const logoButton = document.querySelector(".header__logo");
+
 let currentUserId = null;
 let cardToDelete = null;
 let cardToDeleteId = null;
@@ -72,10 +77,8 @@ const handlePreviewPicture = ({ name, link }) => {
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-
   const submitButton = profileForm.querySelector(".popup__button");
   renderLoading(submitButton, true, "Сохранить", "Сохранение...");
-
   setUserInfo({
     name: profileTitleInput.value,
     about: profileDescriptionInput.value,
@@ -93,10 +96,8 @@ const handleProfileFormSubmit = (evt) => {
 
 const handleAvatarFromSubmit = (evt) => {
   evt.preventDefault();
-
   const submitButton = avatarForm.querySelector(".popup__button");
   renderLoading(submitButton, true, "Сохранить", "Сохранение...");
-
   setUserAvatar(avatarInput.value)
     .then((userData) => {
       profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
@@ -110,22 +111,18 @@ const handleAvatarFromSubmit = (evt) => {
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-
   const submitButton = cardForm.querySelector(".popup__button");
   renderLoading(submitButton, true, "Создать", "Создание...");
-
   const name = cardNameInput.value;
   const link = cardLinkInput.value;
-
   addCard({ name, link })
     .then((newCard) => {
       const cardElement = createCardElement(newCard, {
         currentUserId,
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: handleLikeClick,
-        onDeleteClick: handleDeleteClick
+        onDeleteClick: handleDeleteClick,
       });
-
       placesWrap.prepend(cardElement);
       closeModalWindow(cardFormModalWindow);
       cardForm.reset();
@@ -144,7 +141,6 @@ const handleDeleteClick = (cardElement, cardId) => {
 
 const handleLikeClick = (likeButton, cardId, likeCounter) => {
   const isLiked = likeButton.classList.contains("card__like-button_is-active");
-
   changeLikeCardStatus(cardId, isLiked)
     .then((updatedCard) => {
       likeButton.classList.toggle("card__like-button_is-active");
@@ -155,10 +151,8 @@ const handleLikeClick = (likeButton, cardId, likeCounter) => {
 
 deleteConfirmForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
-
   const submitButton = deleteConfirmForm.querySelector(".popup__button");
   renderLoading(submitButton, true, "Да", "Удаление...");
-
   deleteCardRequest(cardToDeleteId)
     .then(() => {
       cardToDelete.remove();
@@ -169,6 +163,57 @@ deleteConfirmForm.addEventListener("submit", (evt) => {
       renderLoading(submitButton, false, "Да", "Удаление...");
     });
 });
+
+const createDefinitionItem = (term, description) => {
+  const element = statsDefinitionTemplate.content.cloneNode(true);
+  element.querySelector(".popup__info-term").textContent = term;
+  element.querySelector(".popup__info-description").textContent = description;
+  return element;
+};
+
+const createUserBadge = (name) => {
+  const element = statsUserTemplate.content.cloneNode(true);
+  element.querySelector(".popup__list-item").textContent = name;
+  return element;
+};
+
+const handleOpenStats = () => {
+  statsList.innerHTML = "";
+  statsUsersList.innerHTML = "";
+  statsTitle.textContent = "Статистика карточек";
+
+  getCardList()
+    .then((cards) => {
+      const usersSet = new Set(cards.map((c) => c.owner.name));
+      const totalUsers = usersSet.size;
+      const totalLikes = cards.reduce((sum, c) => sum + c.likes.length, 0);
+      const maxLikes = Math.max(...cards.map((c) => c.likes.length));
+      const championCard = cards.find((c) => c.likes.length === maxLikes);
+      const championName = championCard ? championCard.owner.name : "—";
+      const popularCards = cards
+        .filter((c) => c.likes.length === maxLikes)
+        .map((c) => c.name);
+
+      statsList.append(
+        createDefinitionItem("Всего пользователей:", totalUsers)
+      );
+      statsList.append(createDefinitionItem("Всего лайков:", totalLikes));
+      statsList.append(
+        createDefinitionItem("Максимально лайков от одного:", maxLikes)
+      );
+      statsList.append(createDefinitionItem("Чемпион лайков:", championName));
+
+      statsUsersTitle.textContent = "Популярные карточки:";
+      popularCards.forEach((cardName) => {
+        statsUsersList.append(createUserBadge(cardName));
+      });
+
+      openModalWindow(statsPopup);
+    })
+    .catch(console.log);
+};
+
+logoButton.addEventListener("click", handleOpenStats);
 
 profileForm.addEventListener("submit", handleProfileFormSubmit);
 cardForm.addEventListener("submit", handleCardFormSubmit);
@@ -216,7 +261,7 @@ Promise.all([getUserInfo(), getCardList()])
           currentUserId,
           onPreviewPicture: handlePreviewPicture,
           onLikeIcon: handleLikeClick,
-          onDeleteClick: handleDeleteClick
+          onDeleteClick: handleDeleteClick,
         })
       )
     );

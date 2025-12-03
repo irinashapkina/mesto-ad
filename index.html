@@ -12,7 +12,6 @@
   </head>
   <body class="page">
     <div class="page__content">
-
       <header class="header page__section">
         <img
           src="./src/images/logo.svg"
@@ -22,10 +21,8 @@
       </header>
 
       <main class="content">
-
         <section class="profile page__section">
-          <div
-            class="profile__image"></div>
+          <div class="profile__image"></div>
 
           <div class="profile__info">
             <h1 class="profile__title"></h1>
@@ -39,7 +36,6 @@
         <section class="places page__section">
           <ul class="places__list"></ul>
         </section>
-
       </main>
 
       <footer class="footer page__section">
@@ -89,7 +85,6 @@
               Сохранить
             </button>
           </form>
-
         </div>
       </div>
 
@@ -134,7 +129,6 @@
               Создать
             </button>
           </form>
-
         </div>
       </div>
 
@@ -143,6 +137,15 @@
           <button type="button" class="popup__close"></button>
           <img src="" alt="" class="popup__image" />
           <p class="popup__caption"></p>
+        </div>
+      </div>
+      <div class="popup popup_type_remove-card">
+        <div class="popup__content">
+          <button type="button" class="popup__close"></button>
+          <h3 class="popup__title">Вы уверены?</h3>
+          <form class="popup__form" name="remove-card" novalidate>
+            <button type="submit" class="button popup__button">Да</button>
+          </form>
         </div>
       </div>
 
@@ -172,29 +175,29 @@
               Сохранить
             </button>
           </form>
-
         </div>
       </div>
-      
-      <div class="popup popup_type_remove-card">
-  <div class="popup__content">
-    <button type="button" class="popup__close"></button>
-    <h3 class="popup__title">Вы уверены?</h3>
-    <form class="popup__form" name="remove-card" novalidate>
-      <button type="submit" class="button popup__button">Да</button>
-    </form>
-  </div>
-</div>
+      <div class="popup popup_type_info">
+        <div class="popup__content popup__content_content_info">
+          <button type="button" class="popup__close"></button>
+          <h3 class="popup__title"></h3>
+          <dl class="popup__info"></dl>
 
-    </div> 
-<script src="./src/scripts/index.js" defer type="module"></script>
+          <h4 class="popup__text"></h4>
+          <ul class="popup__list"></ul>
+        </div>
+      </div>
+    </div>
+    <script src="./src/scripts/index.js" defer type="module"></script>
 
-<template id="card-template">
-
+    <template id="card-template">
       <li class="places__item card">
         <img class="card__image" src="" alt="" />
         <div class="card__control">
-          <button type="button" class="card__control-button card__control-button_type_delete"></button>
+          <button
+            type="button"
+            class="card__control-button card__control-button_type_delete"
+          ></button>
         </div>
         <div class="card__description">
           <h2 class="card__title"></h2>
@@ -205,6 +208,15 @@
         </div>
       </li>
     </template>
+    <template id="popup-info-definition-template">
+      <div class="popup__info-item">
+        <dt class="popup__info-term"></dt>
+        <dd class="popup__info-description"></dd>
+      </div>
+    </template>
 
+    <template id="popup-info-user-preview-template">
+      <li class="popup__list-item popup__list-item_type_badge"></li>
+    </template>
   </body>
 </html>
