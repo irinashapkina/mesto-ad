@@ -138,15 +138,20 @@ const handleDeleteClick = (cardElement, cardId) => {
 // --------------------------------------------------------
 //   Лайк карточки (API + toggle)
 // --------------------------------------------------------
-const handleLikeClick = (likeButton, cardId) => {
+const handleLikeClick = (likeButton, cardId, likeCounter) => {
   const isLiked = likeButton.classList.contains("card__like-button_is-active");
 
   changeLikeCardStatus(cardId, isLiked)
-    .then(() => {
+    .then((updatedCard) => {
+      // Переключаем состояние лайка
       likeButton.classList.toggle("card__like-button_is-active");
+
+      // Обновляем количество лайков из ответа сервера
+      likeCounter.textContent = updatedCard.likes.length;
     })
     .catch((err) => console.log(err));
 };
+
 
 // --------------------------------------------------------
 //   Submit формы удаления
