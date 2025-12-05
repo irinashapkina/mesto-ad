@@ -1,4 +1,9 @@
-import { createCardElement } from "./components/card.js";
+import { 
+  createCardElement, 
+  deleteCard, 
+  updateLikeState 
+} from "./components/card.js";
+
 import {
   openModalWindow,
   closeModalWindow,
@@ -58,6 +63,7 @@ const statsDefinitionTemplate = document.getElementById(
 const statsUserTemplate = document.getElementById(
   "popup-info-user-preview-template"
 );
+
 const logoButton = document.querySelector(".header__logo");
 
 let currentUserId = null;
@@ -77,7 +83,8 @@ const handlePreviewPicture = ({ name, link }) => {
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-  const submitButton = profileForm.querySelector(".popup__button");
+  const submitButton = evt.submitter;
+
   renderLoading(submitButton, true, "Сохранить", "Сохранение...");
   setUserInfo({
     name: profileTitleInput.value,
@@ -96,7 +103,8 @@ const handleProfileFormSubmit = (evt) => {
 
 const handleAvatarFromSubmit = (evt) => {
   evt.preventDefault();
-  const submitButton = avatarForm.querySelector(".popup__button");
+  const submitButton = evt.submitter;
+
   renderLoading(submitButton, true, "Сохранить", "Сохранение...");
   setUserAvatar(avatarInput.value)
     .then((userData) => {
@@ -111,10 +119,12 @@ const handleAvatarFromSubmit = (evt) => {
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-  const submitButton = cardForm.querySelector(".popup__button");
+  const submitButton = evt.submitter;
+
   renderLoading(submitButton, true, "Создать", "Создание...");
   const name = cardNameInput.value;
   const link = cardLinkInput.value;
+
   addCard({ name, link })
     .then((newCard) => {
       const cardElement = createCardElement(newCard, {
@@ -123,6 +133,7 @@ const handleCardFormSubmit = (evt) => {
         onLikeIcon: handleLikeClick,
         onDeleteClick: handleDeleteClick,
       });
+
       placesWrap.prepend(cardElement);
       closeModalWindow(cardFormModalWindow);
       cardForm.reset();
@@ -139,23 +150,14 @@ const handleDeleteClick = (cardElement, cardId) => {
   openModalWindow(deleteConfirmPopup);
 };
 
-const handleLikeClick = (likeButton, cardId, likeCounter) => {
-  const isLiked = likeButton.classList.contains("card__like-button_is-active");
-  changeLikeCardStatus(cardId, isLiked)
-    .then((updatedCard) => {
-      likeButton.classList.toggle("card__like-button_is-active");
-      likeCounter.textContent = updatedCard.likes.length;
-    })
-    .catch((err) => console.log(err));
-};
-
 deleteConfirmForm.addEventListener("submit", (evt) => {
   evt.preventDefault();
-  const submitButton = deleteConfirmForm.querySelector(".popup__button");
+  const submitButton = evt.submitter;
+
   renderLoading(submitButton, true, "Да", "Удаление...");
   deleteCardRequest(cardToDeleteId)
     .then(() => {
-      cardToDelete.remove();
+      deleteCard(cardToDelete);
       closeModalWindow(deleteConfirmPopup);
     })
     .catch(console.log)
@@ -163,6 +165,16 @@ deleteConfirmForm.addEventListener("submit", (evt) => {
       renderLoading(submitButton, false, "Да", "Удаление...");
     });
 });
+
+const handleLikeClick = (likeButton, cardId, likeCounter) => {
+  const isLiked = likeButton.classList.contains("card__like-button_is-active");
+
+  changeLikeCardStatus(cardId, isLiked)
+    .then((updatedCard) => {
+      updateLikeState(likeButton, likeCounter, updatedCard.likes);
+    })
+    .catch(console.log);
+};
 
 const createDefinitionItem = (term, description) => {
   const element = statsDefinitionTemplate.content.cloneNode(true);
