@@ -1,4 +1,4 @@
-Проект доступен по ссылке:  
+Ссылка на проект:  
 [https://irinashapkina.github.io/mesto-ad/
 ](https://irinashapkina.github.io/mesto-ad/)
 
